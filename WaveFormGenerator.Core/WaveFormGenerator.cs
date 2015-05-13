@@ -12,105 +12,7 @@ namespace TracksporterCore.Audio
 	{
 		#region Public Members
 
-		public static float[] GenerateMp3Wave(string uri)
-		{
-			float[] result;
-			using (FileStream inputStream = new FileStream(uri, FileMode.Open, FileAccess.Read))
-			{
-				using (Mp3FileReader mp3 = new Mp3FileReader(inputStream))
-				{
-					int bytesPerBeat = Math.Abs((176400 / 1024)) * 1024;
-					int numsBeat = (int)Math.Abs(mp3.TotalTime.TotalSeconds);
-					int divisions = 0;
-					while (numsBeat < 5000)
-					{
-						numsBeat *= 2;
-						divisions += 2;
-					}
-
-					result = GenerateWave(mp3, Math.Abs(((bytesPerBeat / divisions) / 1024)) * 1024);
-				}
-			}
-
-			return result;
-		}
-
-		public static float[] GenerateWavWave(string uri)
-		{
-			float[] result;
-			using (FileStream inputStream = new FileStream(uri, FileMode.Open))
-			{
-				using (WaveFileReader wave = new WaveFileReader(inputStream))
-				{
-					int bytesPerSecond = Math.Abs((wave.WaveFormat.AverageBytesPerSecond / 1024)) * 1024;
-					int bytesPerBeat = bytesPerSecond;
-					while (wave.TotalTime.TotalSeconds / bytesPerBeat < 5000)
-					{
-						bytesPerBeat /= 2;
-					}
-
-					result = GenerateWave(wave, bytesPerBeat);
-				}
-			}
-
-			return result;
-		}
-
-		public static float[] GenerateAiffWave(string uri)
-		{
-			float[] result;
-			using (FileStream inputStream = new FileStream(uri, FileMode.Open))
-			{
-				using (AiffFileReader aiff = new AiffFileReader(inputStream))
-				{
-					int bytesPerSecond = Math.Abs((aiff.WaveFormat.AverageBytesPerSecond / 1024)) * 1024;
-					int bytesPerBeat = bytesPerSecond;
-					while (aiff.TotalTime.TotalSeconds / bytesPerBeat < 5000)
-					{
-						bytesPerBeat /= 2;
-					}
-					result = GenerateWave(aiff, bytesPerBeat);
-				}
-			}
-
-			return result;
-		}
-
-
-		#endregion
-
-		#region Private Members
-
-		private static float[] GenerateWave(Stream waveStream, int bytesPerBeat)
-		{
-			List<float> wave = new List<float>();
-			long readed = 0;
-			while (readed != waveStream.Length)
-			{
-				byte[] second = new byte[(readed + bytesPerBeat) > waveStream.Length ? waveStream.Length - readed : bytesPerBeat];
-				readed += waveStream.Read(second, 0, second.Length);
-				List<float> r = new List<float>();
-
-				for (var i = 0; i < second.Length; i += 4)
-				{
-					r.Add((float)BitConverter.ToInt16(second, i) + (float)BitConverter.ToInt16(second, i + 2));
-				}
-
-				float maxValue = float.MinValue;
-
-				foreach (float f in r)
-				{
-					if (f > maxValue) maxValue = f;
-				}
-
-				wave.Add(maxValue);
-
-				if (second.Length < bytesPerBeat) break;
-			}
-			return wave.ToArray();
-		}
-
-		private static float[] GetData(string uri)
+		public static float[] GetArrayPointOf (string uri)
 		{
 			try
 			{
@@ -168,6 +70,104 @@ namespace TracksporterCore.Audio
 			catch {
 				return new float[0];
 			}
+		}
+
+
+		#endregion
+
+		#region Private Members
+
+		private static float[] GenerateWave(Stream waveStream, int bytesPerBeat)
+		{
+			List<float> wave = new List<float>();
+			long readed = 0;
+			while (readed != waveStream.Length)
+			{
+				byte[] second = new byte[(readed + bytesPerBeat) > waveStream.Length ? waveStream.Length - readed : bytesPerBeat];
+				readed += waveStream.Read(second, 0, second.Length);
+				List<float> r = new List<float>();
+
+				for (var i = 0; i < second.Length; i += 4)
+				{
+					r.Add((float)BitConverter.ToInt16(second, i) + (float)BitConverter.ToInt16(second, i + 2));
+				}
+
+				float maxValue = float.MinValue;
+
+				foreach (float f in r)
+				{
+					if (f > maxValue) maxValue = f;
+				}
+
+				wave.Add(maxValue);
+
+				if (second.Length < bytesPerBeat) break;
+			}
+			return wave.ToArray();
+		}
+
+		private static float[] GenerateMp3Wave(string uri)
+		{
+			float[] result;
+			using (FileStream inputStream = new FileStream(uri, FileMode.Open, FileAccess.Read))
+			{
+				using (Mp3FileReader mp3 = new Mp3FileReader(inputStream))
+				{
+					int bytesPerBeat = Math.Abs((176400 / 1024)) * 1024;
+					int numsBeat = (int)Math.Abs(mp3.TotalTime.TotalSeconds);
+					int divisions = 0;
+					while (numsBeat < 5000)
+					{
+						numsBeat *= 2;
+						divisions += 2;
+					}
+
+					result = GenerateWave(mp3, Math.Abs(((bytesPerBeat / divisions) / 1024)) * 1024);
+				}
+			}
+
+			return result;
+		}
+
+		private static float[] GenerateWavWave(string uri)
+		{
+			float[] result;
+			using (FileStream inputStream = new FileStream(uri, FileMode.Open))
+			{
+				using (WaveFileReader wave = new WaveFileReader(inputStream))
+				{
+					int bytesPerSecond = Math.Abs((wave.WaveFormat.AverageBytesPerSecond / 1024)) * 1024;
+					int bytesPerBeat = bytesPerSecond;
+					while (wave.TotalTime.TotalSeconds / bytesPerBeat < 5000)
+					{
+						bytesPerBeat /= 2;
+					}
+
+					result = GenerateWave(wave, bytesPerBeat);
+				}
+			}
+
+			return result;
+		}
+
+		private static float[] GenerateAiffWave(string uri)
+		{
+			float[] result;
+			using (FileStream inputStream = new FileStream(uri, FileMode.Open))
+			{
+				using (AiffFileReader aiff = new AiffFileReader(inputStream))
+				{
+					int bytesPerSecond = Math.Abs((aiff.WaveFormat.AverageBytesPerSecond / 1024)) * 1024;
+					int bytesPerBeat = bytesPerSecond;
+					while (aiff.TotalTime.TotalSeconds / bytesPerBeat < 5000)
+					{
+						bytesPerBeat /= 2;
+					}
+					result = GenerateWave(aiff, bytesPerBeat);
+				}
+			}
+
+			return result;
 		}
 
 		#endregion
